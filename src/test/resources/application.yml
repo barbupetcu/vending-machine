@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:vencingMachine
+    username: sa
+    password: sa
+    driverClassName: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+security:
+  jwt:
+    privateKey: classpath:private.key
+    publicKey: classpath:public.key
+    expiresInSeconds: 3600
+    issuer: vending-machine

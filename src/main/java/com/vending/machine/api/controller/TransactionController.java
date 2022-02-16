@@ -25,8 +25,8 @@ import static com.vending.machine.api.ApiVersion.API_V1;
 @RequiredArgsConstructor
 public class TransactionController {
 
-    private static final String DEPOSIT = "/deposit";
-    private static final String BUY = "/buy";
+    public static final String DEPOSIT = "/deposit";
+    public static final String BUY = "/buy";
     private static final String RESET = "/reset";
 
     private final TransactionService transactionService;
