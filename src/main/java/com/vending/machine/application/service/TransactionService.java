@@ -51,7 +51,7 @@ public class TransactionService {
         if (transactionCost > user.getDeposit()) {
             throw new InsufficientDepositException(user.getDeposit(), transactionCost);
         }
-        userRepository.save(user.subtract(transactionCost));
+        user = userRepository.save(user.subtract(transactionCost));
         productRepository.save(product.buyProduct(buyProductCommand));
 
         return BuyProductResult.builder()
