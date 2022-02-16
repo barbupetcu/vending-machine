@@ -6,6 +6,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.vending.machine.api.controller.AuthenticationController;
+import com.vending.machine.api.controller.UserController;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,21 +38,20 @@ public class SecurityConfiguration {
     private final SecurityProperties securityProperties;
 
     @Bean
-    @Order(0)
     public SecurityFilterChain noSecurity(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(
                         authorize -> authorize
-                                .antMatchers("/swagger-ui/**", "/user").permitAll()
+                                .antMatchers("/swagger-ui/**", UserController.CREATE_USER).permitAll()
                 )
                 .csrf()
                 .disable()
                 .authorizeHttpRequests(authorize -> authorize
-                        .antMatchers("/login").authenticated()
+                        .antMatchers(AuthenticationController.LOGIN).authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .addFilterBefore(new UserLoggedInFilter(), BasicAuthenticationFilter.class)
-                .logout(logout -> logout.logoutUrl("/logout/all")
+                .logout(logout -> logout.logoutUrl(AuthenticationController.LOGOUT)
                         .addLogoutHandler(new SecurityContextLogoutHandler())
                 )
                 .csrf()
@@ -69,21 +70,6 @@ public class SecurityConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    UserDetailsService users() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("user")
-                        .password("password")
-                        .authorities("app")
-                        .passwordEncoder(passwordEncoder()::encode)
-                        .build(),
-                User.withUsername("user1")
-                        .password("password")
-                        .authorities("app")
-                        .passwordEncoder(passwordEncoder()::encode)
-                        .build());
     }
 
     @Bean

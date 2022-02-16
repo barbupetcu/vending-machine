@@ -19,7 +19,7 @@ public class User extends BaseEntity {
     private String password;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> roles;
-    private BigDecimal deposit;
+    private Integer deposit;
 
     public void addRole(UserRole userRole) {
         if (roles == null) {

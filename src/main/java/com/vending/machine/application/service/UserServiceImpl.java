@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(userName));
         if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userRepository.save(user);
         } else {
             throw new OldPasswordNotValidException(userName);
         }
@@ -81,9 +82,4 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    @Transactional
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
-    }
 }

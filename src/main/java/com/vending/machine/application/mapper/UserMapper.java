@@ -15,7 +15,7 @@ public class UserMapper {
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .deposit(BigDecimal.ZERO)
+                .deposit(0)
                 .build();
         request.getRoles().stream()
                 .map(UserRole::fromRole)

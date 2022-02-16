@@ -1,6 +1,7 @@
 package com.vending.machine.api;
 
 import com.vending.machine.api.model.ErrorResponse;
+import com.vending.machine.application.exception.CoinNotAcceptedException;
 import com.vending.machine.application.exception.OldPasswordNotValidException;
 import com.vending.machine.application.exception.UserAlreadyExistsException;
 import com.vending.machine.application.exception.UserNotFoundException;
@@ -26,7 +27,7 @@ public class GlobalExceptionHandler {
         return ErrorResponse.anErrorResponse(ex.getMessage());
     }
 
-    @ExceptionHandler(value = {OldPasswordNotValidException.class})
+    @ExceptionHandler(value = {OldPasswordNotValidException.class, CoinNotAcceptedException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequest(RuntimeException ex) {
         return ErrorResponse.anErrorResponse(ex.getMessage());

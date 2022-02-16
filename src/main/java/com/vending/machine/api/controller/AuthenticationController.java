@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     public static final String LOGIN = "/login";
+    public static final String LOGOUT = "/logout/all";
 
     private final AuthenticationService authenticationService;
 
@@ -26,7 +27,7 @@ public class AuthenticationController {
     }
 
     @Operation(description = "Logout endpoint")
-    @PostMapping("/logout/all")
+    @PostMapping(LOGOUT)
     public void logout() {
         throw new IllegalStateException("This method shouldn't be called. It's implemented by Spring Security filters.");
     }

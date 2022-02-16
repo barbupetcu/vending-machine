@@ -13,7 +13,9 @@ import java.io.IOException;
 public class UserAlreadyLoggedInEntryPoint implements AuthenticationEntryPoint {
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+    public void commence(
+            HttpServletRequest request, HttpServletResponse response, AuthenticationException authException
+    ) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setStatus(HttpServletResponse.SC_CONFLICT);
         ErrorResponse errorResponse = ErrorResponse.anErrorResponse(authException.getMessage());
