@@ -17,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 import static com.vending.machine.api.ApiVersion.API_V1;
 
 @RestController
@@ -33,13 +35,13 @@ public class UserController {
 
     @Operation(summary = "Create user")
     @PostMapping(CREATE_USER)
-    public UserResponse createUser(@RequestBody @Validated CreateUserRequest request) {
+    public UserResponse createUser(@RequestBody @Valid CreateUserRequest request) {
         return userService.createUser(request);
     }
 
     @Operation(summary = "Change user password", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
     @PatchMapping(CHANGE_USER_PASSWORD)
-    public void changePassword(Authentication authentication, @RequestBody @Validated ChangeUserPasswordRequest request) {
+    public void changePassword(Authentication authentication, @RequestBody @Valid ChangeUserPasswordRequest request) {
         ChangePasswordCommand changePasswordCommand = new ChangePasswordCommand(authentication, request.getOldPassword(), request.getNewPassword());
         userService.changePassword(changePasswordCommand);
     }
@@ -48,7 +50,7 @@ public class UserController {
     @PatchMapping(CHANGE_USER_ROLES)
     public AuthenticationResponse changeRoles(
             Authentication authentication,
-            @RequestBody @Validated ChangeUserRolesRequest changeUserRolesRequest
+            @RequestBody @Valid ChangeUserRolesRequest changeUserRolesRequest
     ) {
         ChangeRolesCommand changeRolesCommand = new ChangeRolesCommand(authentication, changeUserRolesRequest.getRoles());
         userService.changeRoles(changeRolesCommand);

@@ -16,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 import static com.vending.machine.api.ApiVersion.API_V1;
 
 @RestController
@@ -49,9 +51,9 @@ public class TransactionController {
     }
 
     @Operation(summary = "Buy product", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
-    @PutMapping(BUY)
+    @PostMapping(BUY)
     @PreAuthorize(UserRoleService.IS_BUYER)
-    public BuyResponse buyProduct(Authentication authentication, BuyRequest buyRequest) {
+    public BuyResponse buyProduct(Authentication authentication, @RequestBody @Valid BuyRequest buyRequest) {
         BuyProductCommand buyProductCommand = new BuyProductCommand(authentication, buyRequest.getProductId(), buyRequest.getAmountOfProducts());
         BuyProductResult buyProductResult = transactionService.buyProduct(buyProductCommand);
         return BuyResponse.builder()

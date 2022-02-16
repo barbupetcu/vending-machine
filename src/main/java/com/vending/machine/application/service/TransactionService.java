@@ -48,7 +48,7 @@ public class TransactionService {
         }
         User user = getUser(buyProductCommand.getUserId());
         Integer transactionCost = product.getCost() * buyProductCommand.getAmountOfProducts();
-        if (transactionCost < user.getDeposit()) {
+        if (transactionCost > user.getDeposit()) {
             throw new InsufficientDepositException(user.getDeposit(), transactionCost);
         }
         userRepository.save(user.subtract(transactionCost));

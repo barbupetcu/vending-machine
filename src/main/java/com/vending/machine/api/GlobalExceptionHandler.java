@@ -3,6 +3,7 @@ package com.vending.machine.api;
 import com.vending.machine.api.model.ErrorResponse;
 import com.vending.machine.application.exception.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -31,7 +32,8 @@ public class GlobalExceptionHandler {
             CoinNotAcceptedException.class,
             InvalidRoleException.class,
             InsufficientDepositException.class,
-            InsufficientProductStockException.class
+            InsufficientProductStockException.class,
+            InvalidProductCostException.class
     })
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequest(RuntimeException ex) {
@@ -43,4 +45,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleUnauthorized(RuntimeException ex) {
         return ErrorResponse.anErrorResponse(ex.getMessage());
     }
+
+    @ExceptionHandler(value = {
+            MethodArgumentNotValidException.class,})
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(MethodArgumentNotValidException ex) {
+        return ErrorResponse.anErrorResponse(ex.getBindingResult().getFieldError().getDefaultMessage());
+    }
+
+
 }

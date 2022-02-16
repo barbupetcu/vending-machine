@@ -16,7 +16,7 @@ public class Product extends BaseEntity {
     private Integer amountAvailable;
     private Integer cost;
     private String name;
-    private String sellerId;
+    private Long sellerId;
 
     public Product buyProduct(BuyProductCommand buyProductCommand) {
         this.amountAvailable -= buyProductCommand.getAmountOfProducts();
