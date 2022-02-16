@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class DepositResponse {
-    private Integer total;
+    private Integer userDeposit;
 }

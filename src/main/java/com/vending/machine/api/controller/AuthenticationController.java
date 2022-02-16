@@ -23,7 +23,7 @@ public class AuthenticationController {
     @PostMapping(LOGIN)
     public AuthenticationResponse login(Authentication authentication) {
         String jwtToken = authenticationService.getToken(authentication);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        return AuthenticationResponse.withToken(jwtToken);
     }
 
     @Operation(description = "Logout endpoint")

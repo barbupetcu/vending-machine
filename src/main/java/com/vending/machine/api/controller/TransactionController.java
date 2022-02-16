@@ -1,12 +1,17 @@
 package com.vending.machine.api.controller;
 
+import com.vending.machine.api.model.buy.BuyRequest;
+import com.vending.machine.api.model.buy.BuyResponse;
 import com.vending.machine.api.model.deposit.DepositRequest;
 import com.vending.machine.api.model.deposit.DepositResponse;
+import com.vending.machine.application.model.*;
 import com.vending.machine.application.service.TransactionService;
+import com.vending.machine.application.service.user.UserRoleService;
 import com.vending.machine.infrastructure.OpenApiConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,15 +32,32 @@ public class TransactionController {
 
     @Operation(summary = "Deposit coins", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
     @PostMapping(DEPOSIT)
-    public DepositResponse createUser(Authentication authentication, @RequestBody @Validated DepositRequest request) {
-        Integer total = transactionService.deposit(authentication.getName(), request.getCoin());
+    @PreAuthorize(UserRoleService.IS_BUYER)
+    public DepositResponse depositCoins(Authentication authentication, @RequestBody @Validated DepositRequest request) {
+        AddDepositCommand depositChange = new AddDepositCommand(authentication, request.getCoin());
+        Integer total = transactionService.deposit(depositChange);
         return DepositResponse.withTotalAmount(total);
     }
 
     @Operation(summary = "Reset deposit", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
     @PutMapping(RESET)
+    @PreAuthorize(UserRoleService.IS_BUYER)
     public DepositResponse resetDeposit(Authentication authentication) {
-        Integer total = transactionService.reset(authentication.getName());
+        UserRequest transactionRequest = UserRequest.build(authentication);
+        Integer total = transactionService.reset(transactionRequest);
         return DepositResponse.withTotalAmount(total);
+    }
+
+    @Operation(summary = "Buy product", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
+    @PutMapping(BUY)
+    @PreAuthorize(UserRoleService.IS_BUYER)
+    public BuyResponse buyProduct(Authentication authentication, BuyRequest buyRequest) {
+        BuyProductCommand buyProductCommand = new BuyProductCommand(authentication, buyRequest.getProductId(), buyRequest.getAmountOfProducts());
+        BuyProductResult buyProductResult = transactionService.buyProduct(buyProductCommand);
+        return BuyResponse.builder()
+                .totalSpent(buyProductResult.getTotalSpent())
+                .productName(buyProductResult.getProductName())
+                .rest(Coin.change(buyProductResult.getRest()))
+                .build();
     }
 }

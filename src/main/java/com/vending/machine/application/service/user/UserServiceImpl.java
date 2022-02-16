@@ -1,13 +1,13 @@
-package com.vending.machine.application.service;
+package com.vending.machine.application.service.user;
 
-import com.vending.machine.api.model.user.ChangeUserRolesRequest;
-import com.vending.machine.application.exception.OldPasswordNotValidException;
-import com.vending.machine.application.exception.UserAlreadyExistsException;
-import com.vending.machine.api.model.user.ChangeUserPasswordRequest;
 import com.vending.machine.api.model.user.CreateUserRequest;
 import com.vending.machine.api.model.user.UserResponse;
+import com.vending.machine.application.exception.OldPasswordNotValidException;
+import com.vending.machine.application.exception.UserAlreadyExistsException;
 import com.vending.machine.application.exception.UserNotFoundException;
 import com.vending.machine.application.mapper.UserMapper;
+import com.vending.machine.application.model.ChangePasswordCommand;
+import com.vending.machine.application.model.ChangeRolesCommand;
 import com.vending.machine.domain.model.User;
 import com.vending.machine.domain.model.UserRole;
 import com.vending.machine.domain.repository.UserRepository;
@@ -43,34 +43,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(String userName, ChangeUserPasswordRequest request) {
-        User user = userRepository.findByUsername(userName)
-                .orElseThrow(() -> new UserNotFoundException(userName));
-        if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    public void changePassword(ChangePasswordCommand changePasswordCommand) {
+        User user = userRepository.findById(changePasswordCommand.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(changePasswordCommand.getUserId()));
+        if (passwordEncoder.matches(changePasswordCommand.getOldPassword(), user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(changePasswordCommand.getNewPassword()));
             userRepository.save(user);
         } else {
-            throw new OldPasswordNotValidException(userName);
+            throw new OldPasswordNotValidException(user.getUsername());
         }
     }
 
     @Override
     @Transactional
-    public void changeRoles(Long userId, ChangeUserRolesRequest request) {
-        User user = userRepository.findByIdWithRoles(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        getUserRolesToRemove(request, user).forEach(user::removeRole);
-        getUserRolesToAdd(request, user).forEach(user::addRole);
+    public void changeRoles(ChangeRolesCommand changeRolesCommand) {
+        User user = userRepository.findByIdWithRoles(changeRolesCommand.getUserId())
+                .orElseThrow(() -> new UserNotFoundException(changeRolesCommand.getUserId()));
+        getUserRolesToRemove(changeRolesCommand, user).forEach(user::removeRole);
+        getUserRolesToAdd(changeRolesCommand, user).forEach(user::addRole);
         userRepository.save(user);
     }
 
-    private List<UserRole> getUserRolesToRemove(ChangeUserRolesRequest request, User user) {
+    private List<UserRole> getUserRolesToRemove(ChangeRolesCommand request, User user) {
         return user.getRoles().stream()
                 .filter(existingRole -> !request.getRoles().contains(existingRole.getRole()))
                 .collect(Collectors.toList());
     }
 
-    private List<UserRole> getUserRolesToAdd(ChangeUserRolesRequest request, User user) {
+    private List<UserRole> getUserRolesToAdd(ChangeRolesCommand request, User user) {
         return request.getRoles().stream()
                 .filter(
                         requestRole -> user.getRoles().stream()
@@ -79,7 +79,5 @@ public class UserServiceImpl implements UserService {
                 )
                 .map(UserRole::fromRole)
                 .collect(Collectors.toList());
-
     }
-
 }

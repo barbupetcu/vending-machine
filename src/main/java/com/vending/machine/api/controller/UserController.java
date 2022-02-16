@@ -1,10 +1,14 @@
 package com.vending.machine.api.controller;
 
+import com.vending.machine.api.model.AuthenticationResponse;
 import com.vending.machine.api.model.user.ChangeUserPasswordRequest;
 import com.vending.machine.api.model.user.ChangeUserRolesRequest;
 import com.vending.machine.api.model.user.CreateUserRequest;
 import com.vending.machine.api.model.user.UserResponse;
-import com.vending.machine.application.service.UserService;
+import com.vending.machine.application.model.ChangePasswordCommand;
+import com.vending.machine.application.model.ChangeRolesCommand;
+import com.vending.machine.application.service.AuthenticationService;
+import com.vending.machine.application.service.user.UserService;
 import com.vending.machine.infrastructure.OpenApiConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,9 +26,10 @@ public class UserController {
 
     public static final String CREATE_USER = "/user";
     private static final String CHANGE_USER_PASSWORD = "/user/password";
-    private static final String CHANGE_USER_ROLES = "/user/{userId}/roles";
+    private static final String CHANGE_USER_ROLES = "/user/roles";
 
     private final UserService userService;
+    private final AuthenticationService authenticationService;
 
     @Operation(summary = "Create user")
     @PostMapping(CREATE_USER)
@@ -33,14 +38,22 @@ public class UserController {
     }
 
     @Operation(summary = "Change user password", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
-    @PutMapping(CHANGE_USER_PASSWORD)
+    @PatchMapping(CHANGE_USER_PASSWORD)
     public void changePassword(Authentication authentication, @RequestBody @Validated ChangeUserPasswordRequest request) {
-        userService.changePassword(authentication.getName(), request);
+        ChangePasswordCommand changePasswordCommand = new ChangePasswordCommand(authentication, request.getOldPassword(), request.getNewPassword());
+        userService.changePassword(changePasswordCommand);
     }
 
     @Operation(summary = "Change user roles", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
-    @PutMapping(CHANGE_USER_ROLES)
-    public void changeRoles(@PathVariable Long userId, @RequestBody @Validated ChangeUserRolesRequest request) {
-        userService.changeRoles(userId, request);
+    @PatchMapping(CHANGE_USER_ROLES)
+    public AuthenticationResponse changeRoles(
+            Authentication authentication,
+            @RequestBody @Validated ChangeUserRolesRequest changeUserRolesRequest
+    ) {
+        ChangeRolesCommand changeRolesCommand = new ChangeRolesCommand(authentication, changeUserRolesRequest.getRoles());
+        userService.changeRoles(changeRolesCommand);
+        String newToken = authenticationService.refreshToken(changeRolesCommand.getUserId());
+        return AuthenticationResponse.withToken(newToken);
+
     }
 }
