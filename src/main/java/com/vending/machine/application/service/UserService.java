@@ -9,7 +9,7 @@ public interface UserService {
 
     UserResponse createUser(CreateUserRequest request);
 
-    void changePassword(Long userId, ChangeUserPasswordRequest request);
+    void changePassword(String userName, ChangeUserPasswordRequest request);
 
     void changeRoles(Long userId, ChangeUserRolesRequest request);
 

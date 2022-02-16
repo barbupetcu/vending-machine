@@ -1,6 +1,7 @@
 package com.vending.machine.application.service;
 
 import com.vending.machine.api.model.user.ChangeUserRolesRequest;
+import com.vending.machine.application.exception.OldPasswordNotValidException;
 import com.vending.machine.application.exception.UserAlreadyExistsException;
 import com.vending.machine.api.model.user.ChangeUserPasswordRequest;
 import com.vending.machine.api.model.user.CreateUserRequest;
@@ -11,6 +12,7 @@ import com.vending.machine.domain.model.User;
 import com.vending.machine.domain.model.UserRole;
 import com.vending.machine.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -30,7 +33,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException(request.getUsername());
         }
-        User user = userRepository.save(UserMapper.build(request));
+        User user = userRepository.save(UserMapper.build(request, passwordEncoder));
         return UserResponse.builder()
                 .userId(user.getId())
                 .timestamp(user.getCreatedAt())
@@ -40,8 +43,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(Long userId, ChangeUserPasswordRequest request) {
-        //todo impl with password encoder after spring security integration
+    public void changePassword(String userName, ChangeUserPasswordRequest request) {
+        User user = userRepository.findByUsername(userName)
+                .orElseThrow(() -> new UserNotFoundException(userName));
+        if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        } else {
+            throw new OldPasswordNotValidException(userName);
+        }
     }
 
     @Override

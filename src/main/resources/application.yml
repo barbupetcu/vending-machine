@@ -20,3 +20,9 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger.html
+security:
+  jwt:
+    privateKey: classpath:private.key
+    publicKey: classpath:public.key
+    expiresInSeconds: 360
+    issuer: vending-machine

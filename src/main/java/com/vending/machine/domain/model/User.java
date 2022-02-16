@@ -1,9 +1,6 @@
 package com.vending.machine.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.util.List;
 @Table(name = "USER")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseEntity {
