@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.List;
+
 import static com.vending.machine.api.ApiVersion.API_V1;
 
 @RestController
@@ -25,6 +27,7 @@ import static com.vending.machine.api.ApiVersion.API_V1;
 public class ProductController {
 
     public static final String PRODUCT = "/product";
+    public static final String PRODUCTS = "/products";
     public static final String SPECIFIC_PRODUCT = "/product/{productId}";
 
     private final ProductService productService;
@@ -65,6 +68,12 @@ public class ProductController {
     @GetMapping(SPECIFIC_PRODUCT)
     public ProductResult getProduct(@PathVariable Long productId) {
         return productService.getProduct(productId);
+    }
+
+    @Operation(summary = "Get all products", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
+    @GetMapping(PRODUCTS)
+    public List<ProductResult> getAllProducts() {
+        return productService.getAllProducts();
     }
 
     @Operation(summary = "Delete product", security = @SecurityRequirement(name = OpenApiConfiguration.AUTHORIZATION_BEARER))
